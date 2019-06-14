@@ -2,7 +2,7 @@
   "name": "runcommand",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
@@ -19,6 +19,7 @@
   "homepage": "https://github.com/asauravsuman/runcommand#readme",
   "dependencies": {
     "child-process-promise": "^2.2.1",
+    "ejs": "^2.6.1",
     "express": "^4.17.1",
     "fs": "0.0.1-security",
     "http": "0.0.0",
