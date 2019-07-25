@@ -30,7 +30,7 @@
     function getTime(){
       const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
       var today = new Date();
-      var date = today.getDate()+' '+(monthNames[today.getMonth()+1])+', '+today.getFullYear();
+      var date = today.getDate()+' '+(monthNames[today.getMonth()])+', '+today.getFullYear();
       var time = today.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true });
       var dateTime = date+' '+time;
       return dateTime;
