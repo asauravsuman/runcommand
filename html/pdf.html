@@ -1,0 +1,86 @@
+<%include header.html%>
+<style>
+  .btn-font { font-size: 14px; }
+  .hide {visibility: hidden;}
+</style>
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
+        <div class="container-fluid">
+          <div class="navbar-wrapper">
+            <div class="navbar-toggle">
+              <button type="button" class="navbar-toggler">
+                <span class="navbar-toggler-bar bar1"></span>
+                <span class="navbar-toggler-bar bar2"></span>
+                <span class="navbar-toggler-bar bar3"></span>
+              </button>
+            </div>
+            <a class="navbar-brand" href="#">Run Command Interface</a>
+          </div>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-bar navbar-kebab"></span>
+            <span class="navbar-toggler-bar navbar-kebab"></span>
+            <span class="navbar-toggler-bar navbar-kebab"></span>
+          </button>
+        </div>
+      </nav>
+      <!-- End Navbar -->
+
+
+  <div class="content">
+    <input type="hidden" id="foldername" value="" />
+    <div class="row">
+      <div class="col-lg-12">
+        <div id="lastrunat" class="stats pull-right"></div>
+      </div>
+      <div class="col-lg-12" style="background-color: #ef8157">
+        <div class="card-header ">
+            <h5 id="name" class="card-title"></h5>
+          </div>
+        <div id="display" class="typo-line">
+          
+      </div>
+
+     <!--  <div class="card-footer ">
+        <hr>  
+        
+      </div> -->
+        
+    </div>
+  </div> <!-- end content -->
+</div>
+</div>
+<%include footer.html%>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    showReports();
+    
+    
+
+  function showReports(){
+    var name = getUrlParameter();
+    var id= getIDParameter();
+    var src = 'read-report/'+getIDParameter()+'/'+name;
+
+    
+
+    $('#name').html(decodeURIComponent(name));
+    $('#display').html('<embed src="'+src+'" width="100%" type="application/pdf" />');
+    // $('#display').html('<object width="400" height="500" type="application/pdf" data="'+src+'">');
+  }
+
+    
+
+  function getUrlParameter() {
+    var sPageURL = window.location.href;
+    var sURLVariables = sPageURL.split('/');
+    return sURLVariables[sURLVariables.length-1];
+  };
+
+  function getIDParameter() {
+    var sPageURL = window.location.href;
+    var sURLVariables = sPageURL.split('/');
+    return sURLVariables[sURLVariables.length-2];
+  };
+})
+</script>

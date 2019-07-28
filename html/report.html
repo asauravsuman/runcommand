@@ -1,0 +1,142 @@
+<%include header.html%>
+<style>
+  .btn-font { font-size: 14px; }
+  .hide {visibility: hidden;}
+</style>
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
+        <div class="container-fluid">
+          <div class="navbar-wrapper">
+            <div class="navbar-toggle">
+              <button type="button" class="navbar-toggler">
+                <span class="navbar-toggler-bar bar1"></span>
+                <span class="navbar-toggler-bar bar2"></span>
+                <span class="navbar-toggler-bar bar3"></span>
+              </button>
+            </div>
+            <a class="navbar-brand" href="#">Run Command Interface</a>
+          </div>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-bar navbar-kebab"></span>
+            <span class="navbar-toggler-bar navbar-kebab"></span>
+            <span class="navbar-toggler-bar navbar-kebab"></span>
+          </button>
+        </div>
+      </nav>
+      <!-- End Navbar -->
+
+
+  <div class="content">
+    <input type="hidden" id="foldername" value="" />
+    <div class="row">
+      <div class="col-lg-12">
+        <div id="lastrunat" class="stats pull-right"></div>
+      </div>
+      <div class="col-lg-12" style="background-color: #ef8157">
+        <div class="card-header ">
+            <h5 class="card-title">Reports</h5>
+          </div>
+        <div class="typo-line">
+          <table id="upload" class="table table-striped table-bordered"
+           style="width:100%;"></table>
+        </div>
+      </div>
+
+     <!--  <div class="card-footer ">
+        <hr>  
+        
+      </div> -->
+        
+    </div>
+  </div> <!-- end content -->
+</div>
+</div>
+<%include footer.html%>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    fetchReports();
+    
+
+    function showTableUpload(files,id){
+      var varhtml = '';
+      varhtml += '<thead><tr><th>Index</th><th>Name</th><th>Date</th></tr></thead>';
+      varhtml += '<tbody>';
+        var rowhtml = files.forEach(function(item, index) {
+          index
+          varhtml += '<tr>';
+            varhtml += '<td>'+ (index+1) +'</td>';
+            varhtml += '<td><a target="_blank" href="/read-report/'+id+'/'+item+'" >'+item+'</a></td>';
+            varhtml += '<td></td>';
+        varhtml += '</tr>';
+        });
+     varhtml += '</tbody>';
+     $('#upload').html(varhtml);
+
+     //  $('#example').DataTable({
+     //  "iDisplayLength": 5,
+     //  "bLengthChange" : false, //thought this line could hide the LengthMenu
+     //  "bInfo":false,
+     //  "searching": false,
+     // });
+    }
+    
+
+  function fetchReports(){
+    var id = getUrlParameter();
+    $.ajax({
+        type: "GET",
+        url: '/fetch-report/'+id,
+        success: function(data, status){
+            if(data.status == true){
+              showTableUpload(data.arrList, id);
+            }else{
+              $('#lastrunat').html('<i class="nc-icon nc-time"></i> Last run successfuly at '+ getTime() );
+            }
+        },
+        dataType: "json",
+        crossDomain:true
+      });
+  }
+
+  function randomString(length ) {
+    var chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    var result = '';
+    for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
+    return result;
+  }
+  function getTime(){
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      var today = new Date();
+      var date = today.getDate()+' '+(monthNames[today.getMonth()])+', '+today.getFullYear();
+      var time = today.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true });
+      var dateTime = date+' '+time;
+      return dateTime;
+    }
+
+    
+
+  function getUrlParameter() {
+    var sPageURL = window.location.href;
+    var sURLVariables = sPageURL.split('/');
+    return sURLVariables[sURLVariables.length-1];
+  };
+
+  //  function getUrlParameter(sParam) {
+  //   var sPageURL = window.location.search.substring(1),
+  //       sURLVariables = sPageURL.split('/'),
+  //       sParameterName,
+  //       i;
+  //       console.log()
+
+  //   for (i = 0; i < sURLVariables.length; i++) {
+  //       console
+  //       sParameterName = sURLVariables[i].split('=');
+
+  //       if (sParameterName[0] === sParam) {
+  //           return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+  //       }
+  //   }
+  // };
+})
+</script>

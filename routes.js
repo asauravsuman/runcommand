@@ -23,6 +23,18 @@ router.get('/aboutus',function(req,res){
   res.render(path.join(__dirname+'/html/aboutus.html'));
 });
 
+router.get('/reports',function(req,res){
+  res.render(path.join(__dirname+'/html/reports.html'));
+});
+
+router.get('/report/:id',function(req,res){
+  res.render(path.join(__dirname+'/html/report.html'));
+});
+
+router.get('/show-report/:id/:name',function(req,res){
+  res.render(path.join(__dirname+'/html/pdf.html'));
+});
+
 router.get('/notfound',function(req,res){
   res.render(path.join(__dirname+'/html/notfound.html'));
 });
@@ -66,6 +78,40 @@ function process_upload(req, res) {
   }
 }
 
+
+router.get('/fetch-reports',function(req,res){
+  var patha = 'data'+path.sep+'temp'+path.sep; ;
+  var arrList = [];
+  fs.readdirSync(patha).forEach(file => {
+    arrList.push(file);
+  });
+  res.json({'status':true, 'msg':'success', 'arrList':arrList, 'err':false});
+});
+
+router.get('/fetch-report/:id',function(req,res){
+  var patha = 'data'+path.sep+'temp'+path.sep+req.params.id; ;
+  var arrList = [];
+  fs.readdirSync(patha).forEach(file => {
+    arrList.push(file);
+  });
+  res.json({'status':true, 'msg':'success', 'arrList':arrList, 'err':false});
+});
+
+router.get('/read-report/:id/:name',function(req,res){
+  var patha = path.sep+'data'+path.sep+'temp'+path.sep+req.params.id+path.sep+req.params.name;
+
+  console.log('patha', patha);
+    fs.readFile(__dirname + patha , function (err,data){
+        console.log('er', err);
+        res.contentType("application/pdf");
+        res.send(data);
+    });
+});
+
+
+
+
+
 function randomString(length ) {
     var chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     var result = '';
@@ -76,7 +122,7 @@ function randomString(length ) {
 
 /********** No Change from here ************/
 // always last route for any invalid routes
-router.get('/*', function(req, res) {
-    res.redirect('/notfound')
-});
+// router.get('/*', function(req, res) {
+//     res.redirect('/notfound')
+// });
 module.exports = router;
