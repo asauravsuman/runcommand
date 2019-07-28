@@ -1,22 +1,86 @@
 <%include header.html%>
+<style>
+  .btn-font { font-size: 14px; }
+  .hide {display: none;}
+</style>
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
+        <div class="container-fluid">
+          <div class="navbar-wrapper">
+            <div class="navbar-toggle">
+              <button type="button" class="navbar-toggler">
+                <span class="navbar-toggler-bar bar1"></span>
+                <span class="navbar-toggler-bar bar2"></span>
+                <span class="navbar-toggler-bar bar3"></span>
+              </button>
+            </div>
+            <a class="navbar-brand" href="#">Run Command Interface</a>
+          </div>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-bar navbar-kebab"></span>
+            <span class="navbar-toggler-bar navbar-kebab"></span>
+            <span class="navbar-toggler-bar navbar-kebab"></span>
+          </button>
+        </div>
+      </nav>
+      <!-- End Navbar -->
+
+
   <div class="content">
+    <input type="hidden" id="foldername" value="" />
     <div class="row">
       <div class="col-md-12">
-        <div class="card">
+        <div class="card" style="background-color: #b5e7a0">
           <div class="card-header ">
-            <h5 class="card-title">Run Command Interface</h5>
+            <h5 class="card-title"></h5>
             <p class="card-category">Monitor run commands</p>
           </div>
           <div class="card-body ">
             <div class="typo-line">
-                <h3><button id="command" class="category">Command: </button></h3>
-                <h3><p class="category">Response: </p>
-                    <span id="response"></span>
-                </h3>
+              <div id="">
+                <span id="dZUpload" class="btn btn-info btn-font">Browse or click here </span>
+              </div>
+              <!-- <div class="dz-default dz-message"></div> -->
+              <div class="progress-container progress-success hide">
+                <span class="progress-badge">Success</span>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                    </div>
+                </div>
+            </div>
+
+              <table id="example" class="table table-striped table-bordered" style="width:100%">
+                <!-- <thead>
+                    <tr>
+                        <th>Index</th>
+                        <th>Name</th>
+                        <th>Size</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Tiger Nixon</td>
+                        <td>15 kb</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Tiger Nixon</td>
+                        <td>15 kb</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Tiger Nixon</td>
+                        <td>15 kb</td>
+                    </tr>
+                </tbody> -->
+            </table>
+
             </div>
           </div>
           <div class="card-footer ">
             <hr>
+            <button id="command" class="btn btn-info btn-font pull-right">Apply algorithm</button>
             <div id="lastrunat" class="stats"></div>
           </div>
         </div>
@@ -27,6 +91,107 @@
 
 <script type="text/javascript">
   $(document).ready(function(){
+     // $('#example').DataTable({
+     //  "iDisplayLength": 5,
+     //  "bLengthChange" : false, //thought this line could hide the LengthMenu
+     //  "bInfo":false,
+     //  "searching": false,
+     // });
+    // Dropzone.options.myAwesomeDropzone = {
+    //   paramName: "file", // The name that will be used to transfer the file
+    //   maxFilesize: 2, // MB
+    //   accept: function(file, done) {
+    //     if (file.name == "justinbieber.jpg") {
+    //       done("Naha, you don't.");
+    //     }
+    //     else { done(); }
+    //   }
+    // };
+    Dropzone.autoDiscover = false;
+    var myDropzone = new Dropzone("#dZUpload",
+      { 
+        url: "/upload-files",
+        uploadMultiple: true,  //upload multiple files
+        maxFilesize: 500,  //1 mb is here the max file upload size constraint
+        acceptedFiles: ".jpeg,.pdf, .zip",
+        paramName: function(n) { return 'source_file[]';},
+        parallelUploads: 5,
+      }
+    );
+    myDropzone.on("addedfile", function(file) {
+      file.previewElement.innerHTML = "";
+      $('.progress-container').removeClass('hide'); 
+      $('.progress-container .progress-badge').html('File upload in progress.');
+      $('.progress-container .progress-bar').width('0%');
+    });
+    myDropzone.on("totaluploadprogress", function (progress) {
+      // file.previewElement.innerHTML = "";
+      $(".progress-container .progress-bar").width(progress + '%');
+      $(".the-progress-text").text(progress + '%');
+    });
+//     uploader.on('success', function( file, resp ){
+//   ...
+// });
+    myDropzone.on("success", function(file, response) {
+      // console.log(response);
+      $('#foldername').val(response.nameFolder);
+      file.previewElement.innerHTML = "";
+      $('.progress-container .progress-badge').html('File upload complete.');
+      $('.progress-container .progress-bar').width('100%');
+      showTable(myDropzone.files);
+      setTimeout(function(){ 
+        $('.progress-container').addClass('hide');
+        myDropzone.removeAllFiles();
+      }, 5000);      
+    });
+
+    function showTable(files){
+      var varhtml = '';
+      varhtml += '<thead><tr><th>Index</th><th>Name</th><th>Size</th></tr></thead>';
+      varhtml += '<tbody>';
+        var rowhtml = files.forEach(function(item, index) {
+          index
+          varhtml += '<tr>';
+            varhtml += '<td>'+ (index+1) +'</td>';
+            varhtml += '<td>'+item.name+'</td>';
+            varhtml += '<td>'+ Math.round((item.size/ 1000),2)+' kb</td>';
+        varhtml += '</tr>';
+        });
+     varhtml += '</tbody>';
+     $('#example').html(varhtml);
+
+     //  $('#example').DataTable({
+     //  "iDisplayLength": 5,
+     //  "bLengthChange" : false, //thought this line could hide the LengthMenu
+     //  "bInfo":false,
+     //  "searching": false,
+     // });
+    }
+
+    // $("#dZUpload").dropzone({
+    //     UR: "hn_SimpeFileUploader.ashx",
+    //     addRemoveLinks: true,
+    //     success: function (file, response) {
+    //         var imgName = response;
+    //         file.previewElement.classList.add("dz-success");
+    //         console.log("Successfully uploaded :" + imgName);
+    //     },
+    //     error: function (file, response) {
+    //         file.previewElement.classList.add("dz-error");
+    //     }
+    // });
+    // function listFiles(item, index) {
+    //   varhtml += '<tr>';
+    //         varhtml += '<td>1</td>';
+    //         varhtml += '<td>Tiger Nixon</td>';
+    //         varhtml += '<td>15 kb</td>';
+    //     varhtml += '</tr>';
+    //   return 
+    //   document.getElementById("demo").innerHTML += index + ":" + item + "<br>"; 
+    // }
+
+
+    $('#lastrunat').html('Browse file and process it.' );
     function getTime(){
       const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
       var today = new Date();
@@ -36,21 +201,30 @@
       return dateTime;
     }
     $('#command').click(function(){
+      var foldername = $('#foldername').val();
       $.ajax({
-        type: "GET",
+        type: "POST",
         url: '/run',
+        data: {'foldername': foldername},
         success: function(data, status){
             if(data.status == true){
               $('#response').html(data.msg);
-              $('#lastrunat').html('<i class="fa fa-history"></i> Last run successfuly at '+ getTime() );
+              $('#lastrunat').html('<i class="nc-icon nc-time"></i> Last run successfuly at '+ getTime() );
             }else{
               $('#response').html(data.err);
-              $('#lastrunat').html('<i class="fa fa-history"></i> Last run successfuly at '+ getTime() );
+              $('#lastrunat').html('<i class="nc-icon nc-time"></i> Last run successfuly at '+ getTime() );
             }
         },
         dataType: "json",
         crossDomain:true
       });
     });
-  })
+
+  function randomString(length ) {
+    var chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    var result = '';
+    for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
+    return result;
+  }
+})
 </script>
