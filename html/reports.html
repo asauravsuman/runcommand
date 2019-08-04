@@ -66,8 +66,8 @@
           index
           varhtml += '<tr>';
             varhtml += '<td>'+ (index+1) +'</td>';
-            varhtml += '<td><a href="report/'+item+'" >'+item+'</a></td>';
-            varhtml += '<td></td>';
+            varhtml += '<td><a href="report/'+item.name+'" >'+item.name+'</a></td>';
+            varhtml += '<td>'+ Math.round((item.size/ 1000),2)+' kb</td>';
         varhtml += '</tr>';
         });
      varhtml += '</tbody>';

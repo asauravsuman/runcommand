@@ -88,10 +88,14 @@
         maxFilesize: 50000,  //1 mb is here the max file upload size constraint
         acceptedFiles: ".jpeg,.pdf, .zip",
         paramName: function(n) { return 'source_file[]';},
+        params: function(n) { return {'foldername':$('#foldername').val()}},
         parallelUploads: 500,
       }
     );
     myDropzone.on("addedfile", function(file) {
+      if($('#foldername').val() == ''){
+        $('#report').html('');
+      }
       file.previewElement.innerHTML = "";
       $('#upload-progress').removeClass('hide'); 
       $('#upload-progress .progress-badge').html('File upload in progress.');
@@ -107,8 +111,7 @@
       file.previewElement.innerHTML = "";
       $('.progress-container .progress-badge').html('File upload complete.');
       $('.progress-container .progress-bar').width('100%');
-      showTableUpload(myDropzone.files);
-      fetchReports();
+      showTableUpload(response.files);
       setTimeout(function(){ 
         $('.progress-container').addClass('hide');
         myDropzone.removeAllFiles();
@@ -117,7 +120,7 @@
 
     function showTableUpload(files){
       var varhtml = '';
-      varhtml += '<thead><tr><th>Index</th><th>Name</th><th>Size</th></tr></thead>';
+      varhtml += '<thead><tr><th>Index</th><th>Name</th><th>Size</th><th>Action</th></tr></thead>';
       varhtml += '<tbody>';
         var rowhtml = files.forEach(function(item, index) {
           index
@@ -125,6 +128,12 @@
             varhtml += '<td>'+ (index+1) +'</td>';
             varhtml += '<td>'+item.name+'</td>';
             varhtml += '<td>'+ Math.round((item.size/ 1000),2)+' kb</td>';
+            varhtml += '<td>';
+            // varhtml += '<a target="_blank" href="/read-report/'+item.name+'"><i class="nc-icon nc-badge"></i><p>View</p></a> &nbsp';
+            varhtml += '<span onClick="viewFile(`'+item.name+'`)"><i class="nc-icon nc-badge"></i>View</span> &nbsp;';
+
+            varhtml += '<span class="removeFile" atr="'+item.name+'" ><i class="nc-icon nc-simple-remove"></i>Remove</span>';
+            varhtml += '</td>';
         varhtml += '</tr>';
         });
      varhtml += '</tbody>';
@@ -145,7 +154,7 @@
         url: '/fetch-report/'+id,
         success: function(data, status){
             if(data.status == true){
-              showTableReport(data.arrList,id);
+              showTableReport(data.arrList, id);
             }else{
               $('#lastrunat').html('<i class="nc-icon nc-time"></i> Last run successfuly at '+ getTime() );
             }
@@ -163,8 +172,8 @@
           index
           varhtml += '<tr>';
             varhtml += '<td>'+ (index+1) +'</td>';
-            varhtml += '<td><a target="_blank" href="read-report/'+id+'/'+item+'" >'+item+'</a></td>';
-            varhtml += '<td></td>';
+            varhtml += '<td><a target="_blank" href="read-report/'+id+'/'+item.name+'" >'+item.name+'</a></td>';
+            varhtml += '<td>'+ Math.round((item.size/ 1000),2)+' kb</td>';
         varhtml += '</tr>';
         });
      varhtml += '</tbody>';
@@ -177,7 +186,38 @@
      //  "searching": false,
      // });
     }
+    // removeFile
+    $('#upload').on('click', '.removeFile', function(){
+      var name = $(this).attr('atr');
+      var id = $('#foldername').val();
+      $.ajax({
+          type: "GET",
+          url: '/remove-file/'+id+'/'+name,
+          success: function(data, status){
+            if(data.status == true){
+              showTableUpload(data.files);
+            }
+          },
+          dataType: "json",
+          crossDomain:true
+        });      
+    });
 
+    $('#upload').on('click', '.viewFile', function(){
+      var name = $(this).attr('atr');
+      var id = $('#foldername').val();
+      $.ajax({
+          type: "GET",
+          url: '/view-file/'+id+'/'+name,
+          success: function(data, status){
+            if(data.status == true){
+              showTableUpload(response.files);
+            }
+          },
+          dataType: "json",
+          crossDomain:true
+        });      
+    });
 
     $('#lastrunat').html('Browse file and process it.' );
     function getTime(){
@@ -196,6 +236,8 @@
         data: {'foldername': foldername},
         success: function(data, status){
             if(data.status == true){
+              fetchReports();
+              $('#foldername').val('');
               $('#response').html(data.msg);
               $('#lastrunat').html('<i class="nc-icon nc-time"></i> Last run successfuly at '+ getTime() );
             }else{

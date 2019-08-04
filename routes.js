@@ -56,9 +56,8 @@ router.post('/run',function(req,res){
 
 router.post('/upload-files', upload_files.array('source_file[]'), process_upload);
 function process_upload(req, res) {
-  if(req.files) { 
-    // console.log("req.files.length = ", req.files.length);
-    var nameFolder = randomString(10);
+  if(req.files) {
+    var nameFolder = (req.body.foldername) ? req.body.foldername : randomString(10);
     var upload_dir='data'+path.sep+'temp'+path.sep+nameFolder;  //somewhere relevant
     if (!fs.existsSync(upload_dir)){
         fs.mkdirSync(upload_dir);
@@ -73,7 +72,13 @@ function process_upload(req, res) {
       })
       .then( _ => {
         // console.log("Added files : Success");
-        res.json({'status':true, 'msg':'success', 'nameFolder':nameFolder, 'err':false});
+        var patha = 'data'+path.sep+'temp'+path.sep+nameFolder ;
+        var arrList = [];
+        fs.readdirSync(patha).forEach(file => {
+          var filename = patha+path.sep+file;
+          arrList.push({'name': file, 'size': fs.statSync(filename).size});
+        });
+        res.json({'status':true, 'msg':'success', 'nameFolder':nameFolder, 'files': arrList, 'err':false});
       });
   }
 }
@@ -83,7 +88,8 @@ router.get('/fetch-reports',function(req,res){
   var patha = 'data'+path.sep+'temp'+path.sep; ;
   var arrList = [];
   fs.readdirSync(patha).forEach(file => {
-    arrList.push(file);
+    var filename = patha+path.sep+file;
+    arrList.push({'name': file, 'size': fs.statSync(filename).size});
   });
   res.json({'status':true, 'msg':'success', 'arrList':arrList, 'err':false});
 });
@@ -92,23 +98,36 @@ router.get('/fetch-report/:id',function(req,res){
   var patha = 'data'+path.sep+'temp'+path.sep+req.params.id; ;
   var arrList = [];
   fs.readdirSync(patha).forEach(file => {
-    arrList.push(file);
+    var filename = patha+path.sep+file;
+    arrList.push({'name': file, 'size': fs.statSync(filename).size});
   });
   res.json({'status':true, 'msg':'success', 'arrList':arrList, 'err':false});
 });
 
 router.get('/read-report/:id/:name',function(req,res){
   var patha = path.sep+'data'+path.sep+'temp'+path.sep+req.params.id+path.sep+req.params.name;
-
-  console.log('patha', patha);
     fs.readFile(__dirname + patha , function (err,data){
-        console.log('er', err);
         res.contentType("application/pdf");
         res.send(data);
     });
 });
 
+router.get('/view-file/:id/:name',function(req,res){
+  res.json({'status':true, 'msg':'success', 'err':false});
+});
+router.get('/remove-file/:id/:name',function(req,res){
+  var arrList = [];
+  var patha = 'data'+path.sep+'temp'+path.sep+req.params.id;
+  fs.unlink(path.join(patha, req.params.name), err => {
+    if (err) throw err;
 
+    fs.readdirSync(patha).forEach(file => {
+      var filename = patha+path.sep+file;
+      arrList.push({'name': file, 'size': fs.statSync(filename).size});
+    });
+    res.json({'status':true, 'msg':'success', 'files':arrList, 'err':false});
+  });
+});
 
 
 
