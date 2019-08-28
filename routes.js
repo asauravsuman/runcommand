@@ -9,6 +9,7 @@ var upload_files = require('multer')();
 var Promise = require('bluebird');
 var fs = Promise.promisifyAll(require('fs'));
 var sanitize = require("sanitize-filename");
+var lineReader = require('line-reader');
 
 /********** Adding routes ************/
 router.get('/',function(req,res){
@@ -94,6 +95,32 @@ router.get('/fetch-reports',function(req,res){
   res.json({'status':true, 'msg':'success', 'arrList':arrList, 'err':false});
 });
 
+router.get('/read-progress/:id',function(req,res){
+  var patha = 'data'+path.sep+'log'+path.sep+'cube_2019-8-26_12-13.log';
+  var arrList = {};
+  lineReader.eachLine(patha, function(line, last) {
+    // console.log(line);
+    var title= parseTitleFromLog(line)
+    var tempObj = {
+      status: parseStatusFromLog(line),
+      duration: parseDurationFromLog(line),
+    }
+    arrList[title] = tempObj;
+    if(last){
+      if (line.indexOf('FINISHED') > -1){
+        res.json({'status':true, 'msg':'Processing successful.', 'arrList':arrList, 'perct': 100});
+      }else{
+        res.json({'status':false, 'msg':'Processing in progress.', 'arrList':arrList, 'perct': 80});
+      } 
+    }
+  });
+  // fs.readdirSync(patha).forEach(file => {
+  //   var filename = patha+path.sep+file;
+  //   arrList.push({'name': file, 'size': fs.statSync(filename).size});
+  // });
+  // res.json({'status':true, 'msg':'success', 'arrList':arrList, 'err':false});
+});
+
 router.get('/fetch-report/:id',function(req,res){
   var patha = 'data'+path.sep+'temp'+path.sep+req.params.id; ;
   var arrList = [];
@@ -138,6 +165,25 @@ function randomString(length ) {
     return result;
   }
 
+function parseTitleFromLog(line) {
+  var title = '';
+  var array = line.split(",");
+  return array[2];
+}
+function parseStatusFromLog(line) {
+  var title = '';
+  var array = line.split(",");
+  if (array[4].indexOf('CuBe analysis is done') > -1){
+    return 'done';
+  }else{
+    return 'progress';
+  }
+}
+function parseDurationFromLog(line) {
+  var title = '';
+  var array = line.split(",");
+  return array[3];
+}
 
 /********** No Change from here ************/
 // always last route for any invalid routes
